@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.example.spring_security.Model.User;
+import com.example.spring_security.Model.UserPrincipal;
 import com.example.spring_security.Repository.UserRepository;
 
 @Service
@@ -19,11 +20,12 @@ public class MyUserDetailsService implements UserDetailsService{
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		// TODO Auto-generated method stub
 		User user = userRepo.findByUsername(username);
+		System.out.println(userRepo.findAll());
 		if(user == null) {
 			System.out.println("User not Found!");
 			throw new UsernameNotFoundException("User 404");
 		}
-		return null;
+		return new UserPrincipal(user);
 	}
 
 }
