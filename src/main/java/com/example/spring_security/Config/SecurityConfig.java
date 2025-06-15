@@ -14,6 +14,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import com.example.spring_security.Filter.JwtFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -21,6 +24,9 @@ public class SecurityConfig {
 	
 	@Autowired
 	private UserDetailsService userDetailsService;
+	
+	@Autowired
+	private JwtFilter jwtFilter;
 	
 	@Bean
 	public AuthenticationProvider authProvider() {
@@ -35,17 +41,56 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder(); // Spring auto wraps this in DelegatingPasswordEncoder
     }
 	
+//	@Bean
+//	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+//		
+//		http.csrf(customizer -> customizer.disable());
+//		
+//		http.authorizeHttpRequests(request -> request
+//				.requestMatchers("register","login")
+//				.permitAll()
+//				.anyRequest()
+//				.authenticated()
+//		);
+//		
+////		http.formLogin(Customizer.withDefaults());
+////		http.httpBasic(Customizer.withDefaults());
+//		
+//		http.sessionManagement(session -> session
+//				.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+//		);
+//		http.authenticationProvider(authProvider());
+//		
+//		//adding extra filter
+//		http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);)
+//		
+//		return http.build();
+//	}
+	
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		
+
 		http.csrf(customizer -> customizer.disable());
-		http.authorizeHttpRequests(request -> request.requestMatchers("register","login").permitAll().anyRequest().authenticated());
-//		http.formLogin(Customizer.withDefaults());
-//		http.httpBasic(Customizer.withDefaults());
-		http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).authenticationProvider(authProvider());
-		
-		return http.build();
+
+		http.authorizeHttpRequests(request -> request
+				.requestMatchers("register","login")
+				.permitAll()
+				.anyRequest()
+				.authenticated()
+		);
+
+		http.sessionManagement(session -> session
+				.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+		);
+
+	    http.authenticationProvider(authProvider());
+	    
+	    //adding extra filter
+	    http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
+	    return http.build();
 	}
+
 	
 	@Bean
 	public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
