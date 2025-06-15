@@ -6,13 +6,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -22,7 +22,7 @@ public class SecurityConfig {
 	@Autowired
 	private UserDetailsService userDetailsService;
 	
-	@SuppressWarnings("deprecation")
+	@Bean
 	public AuthenticationProvider authProvider() {
 		DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
 		provider.setUserDetailsService(userDetailsService);
@@ -31,12 +31,17 @@ public class SecurityConfig {
 	}
 	
 	@Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder(); // Spring auto wraps this in DelegatingPasswordEncoder
+    }
+	
+	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		
 		http.csrf(customizer -> customizer.disable());
-		http.authorizeHttpRequests(request -> request.anyRequest().authenticated());
-		http.formLogin(Customizer.withDefaults());
-		http.httpBasic(Customizer.withDefaults());
+		http.authorizeHttpRequests(request -> request.requestMatchers("register","login").permitAll().anyRequest().authenticated());
+//		http.formLogin(Customizer.withDefaults());
+//		http.httpBasic(Customizer.withDefaults());
 		http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).authenticationProvider(authProvider());
 		
 		return http.build();
