@@ -1,0 +1,21 @@
+version: "3.9"
+services:
+	app:
+		build:
+		ports:
+			-"8080:8080"
+		networks:
+			-my-network
+	mysql:
+		image:mysql:lates
+		enivroment:
+			MYSQL_USER: root
+			MYSQL_PASSWORD: root
+			MYSQL_DB: jobPost
+		ports:
+			-"3306:3306"
+		networks:
+			-my-network
+	networks:
+		my-network:
+			driver:bridge
